@@ -1,0 +1,73 @@
+{
+  "name": "nexi-a77-zvt-poc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist-electron/electron/main.js",
+  "engines": {
+    "node": "^18.13.0 || ^20.9.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:angular\" \"npm:dev:electron\"",
+    "dev:angular": "ng serve --host 127.0.0.1 --port 4200",
+    "predev:electron": "npm run build:zvt-client",
+    "dev:electron": "wait-on tcp:127.0.0.1:4200 && npm run build:electron && cross-env ELECTRON_RENDERER_URL=http://127.0.0.1:4200 electron .",
+    "build:zvt-client": "npm run build -w packages/zvt-client",
+    "premock": "npm run build:zvt-client",
+    "mock": "tsx mock/run-mock.ts",
+    "presmoke": "npm run build:zvt-client",
+    "smoke": "tsx scripts/smoke.ts",
+    "pretest": "npm run build:zvt-client",
+    "test": "vitest run",
+    "prebuild": "npm run build:zvt-client",
+    "build": "npm run build:angular && npm run build:electron",
+    "prebuild:electron": "npm run build:zvt-client",
+    "build:angular": "ng build",
+    "build:electron": "npm run build:electron-main && npm run build:preload",
+    "build:electron-main": "tsc -p tsconfig.electron.json",
+    "build:preload": "tsc -p tsconfig.preload.json && node scripts/build-preload.mjs",
+    "dist": "npm run build && electron-builder --win --linux"
+  },
+  "dependencies": {
+    "@accurateitsolutionorg/nexi-zvt-client": "^0.2.0",
+    "@angular/animations": "^17.2.0",
+    "@angular/common": "^17.2.0",
+    "@angular/compiler": "^17.2.0",
+    "@angular/core": "^17.2.0",
+    "@angular/forms": "^17.2.0",
+    "@angular/platform-browser": "^17.2.0",
+    "@angular/router": "^17.2.0",
+    "electron": "^29.1.0",
+    "rxjs": "^7.8.1",
+    "tslib": "^2.6.3",
+    "zone.js": "^0.14.10"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17.2.0",
+    "@angular/cli": "^17.2.0",
+    "@angular/compiler-cli": "^17.2.0",
+    "@types/node": "^22.10.2",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron-builder": "^25.1.8",
+    "tsx": "^4.19.2",
+    "typescript": "5.3.3",
+    "vitest": "^2.1.8",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "de.nexi.zvt-poc",
+    "productName": "Nexi A77 ZVT PoC",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    }
+  }
+}

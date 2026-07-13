@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["electron/**/*.ts", "mock/**/*.ts", "scripts/**/*.ts", "shared/**/*.ts", "tests/**/*.ts"]
+}

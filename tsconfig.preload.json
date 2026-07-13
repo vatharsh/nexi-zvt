@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist-electron/preload",
+    "rootDir": ".",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "types": ["node", "electron"],
+    "sourceMap": true
+  },
+  "include": ["electron/preload.ts", "shared/**/*.ts"]
+}

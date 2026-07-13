@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-electron/
+release/
+*.log
+.DS_Store
+.angular/
+out-tsc/
+packages/*/dist/
+*.tgz
+.npmrc

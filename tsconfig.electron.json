@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist-electron",
+    "rootDir": ".",
+    "types": ["node", "electron"],
+    "sourceMap": true
+  },
+  "include": ["electron/**/*.ts", "mock/**/*.ts", "shared/**/*.ts", "scripts/run-electron.ts"]
+}

@@ -1,0 +1,183 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"></rect><path d="M2 10h20"></path><path d="M6 15h4"></path></svg>
+      </span>
+      <div class="brand-text">
+        <strong>Nexi ZVT</strong>
+        <small>A77 Terminal Console</small>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button type="button" class="nav-item" [class.active]="activeTab() === 'pay'" (click)="activeTab.set('pay')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"></rect><path d="M2 9h20"></path><path d="M6 14h5"></path></svg>
+        <span>Pay</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab() === 'settings'" (click)="activeTab.set('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.63 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.63a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.37 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.04z"></path></svg>
+        <span>Settings</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab() === 'result'" (click)="activeTab.set('result')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <span>Result</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab() === 'log'" (click)="activeTab.set('log')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        <span>Log</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="mode-switch" aria-label="Terminal mode">
+        <button type="button" [class.active]="config().mode === 'mock'" (click)="setMode('mock')">Mock</button>
+        <button type="button" [class.active]="config().mode === 'real'" (click)="setMode('real')">Real</button>
+      </div>
+      <div class="host-line">
+        <span class="dot" [class.mock]="config().mode === 'mock'"></span>
+        {{ activeProfile().host || 'No host configured' }}:{{ activeProfile().port }}
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-column">
+    <header class="topbar">
+      <div class="status-pill" [class.mock]="config().mode === 'mock'">
+        <span class="pulse"></span>
+        <strong>{{ statusLine() }}</strong>
+      </div>
+      <span class="message" *ngIf="message()">{{ message() }}</span>
+      <span class="spacer"></span>
+      <span class="badge" *ngIf="config().mode === 'mock'">MOCK MODE</span>
+    </header>
+
+    <section *ngIf="config().mode === 'mock'" class="mock-panel">
+      <div class="mock-panel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <label>
+        Scenario
+        <select [ngModel]="mockScenario()" (ngModelChange)="setScenario($event)">
+          <option *ngFor="let scenario of scenarios" [ngValue]="scenario">{{ scenario }}</option>
+        </select>
+      </label>
+      <span class="mock-stat"><span class="status-dot" [class.on]="mockStatus()?.running"></span>{{ mockStatus()?.running ? 'listening' : 'stopped' }}</span>
+      <span class="mock-stat">{{ mockStatus()?.connections ?? 0 }} connection(s)</span>
+    </section>
+
+    <main class="content">
+      <section *ngIf="activeTab() === 'pay'" class="grid">
+        <div class="panel">
+          <h2>Payment</h2>
+          <label>
+            Amount EUR
+            <input [ngModel]="amountText()" (ngModelChange)="amountText.set($event)" inputmode="decimal" placeholder="1,00" class="amount-input">
+          </label>
+          <p class="error" *ngIf="amountError()">{{ amountError() }}</p>
+          <div class="actions">
+            <button type="button" class="primary" [disabled]="busy() || !!amountError()" (click)="startPayment()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"></rect><path d="M2 9h20"></path></svg>
+              Pay
+            </button>
+            <button type="button" [disabled]="!busy()" (click)="cancelPayment()">Cancel</button>
+            <button type="button" [disabled]="busy()" (click)="endOfDay()">End of day</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Recent transactions</h2>
+          <ol class="history" *ngIf="history().length; else noHistory">
+            <li *ngFor="let item of history()">
+              <span class="mini-badge" [class.real]="item.mode === 'real'">{{ item.mode }}</span>
+              <span class="history-summary">{{ item.summary }}</span>
+              <span class="history-result" [class.approved]="item.result.approved" [class.declined]="!item.result.approved">{{ item.result.resultText || (item.result.approved ? 'Approved' : 'Declined') }}</span>
+            </li>
+          </ol>
+          <ng-template #noHistory>
+            <p class="empty-state">No transactions yet.</p>
+          </ng-template>
+        </div>
+      </section>
+
+      <section *ngIf="activeTab() === 'settings'" class="grid">
+        <div class="panel">
+          <h2>Mock terminal</h2>
+          <dl>
+            <dt>Host</dt><dd>127.0.0.1</dd>
+            <dt>Port</dt><dd>20007</dd>
+            <dt>Password</dt><dd>000000</dd>
+          </dl>
+        </div>
+        <div class="panel">
+          <h2>Real terminal</h2>
+          <label>
+            Host
+            <input [ngModel]="config().real.host" (ngModelChange)="updateRealHost($event)">
+          </label>
+          <label>
+            Port
+            <input type="number" [ngModel]="config().real.port" (ngModelChange)="updateRealPort($event)">
+          </label>
+          <label>
+            Password
+            <input [ngModel]="config().real.password" (ngModelChange)="updateRealPassword($event)">
+          </label>
+          <div class="actions">
+            <button type="button" (click)="saveRealProfile()">Save</button>
+            <button type="button" class="primary" [disabled]="busy()" (click)="connectAndRegister()">Connect & register</button>
+          </div>
+        </div>
+      </section>
+
+      <section *ngIf="activeTab() === 'result'" class="panel result-panel">
+        <ng-container *ngIf="result(); else noResult">
+          <div class="banner" [class.approved]="result()!.approved" [class.declined]="!result()!.approved">
+            <span class="banner-icon">
+              <svg *ngIf="result()!.approved" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+              <svg *ngIf="!result()!.approved" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </span>
+            <div class="banner-text">
+              <span>{{ result()!.approved ? 'Approved' : 'Declined' }}</span>
+              <strong>{{ result()!.resultText }}</strong>
+            </div>
+            <span class="mini-badge" [class.real]="result()!.mode === 'real'">{{ result()!.mode }}</span>
+            <span *ngIf="result()!.mode === 'mock'" class="badge">MOCK</span>
+          </div>
+          <dl class="details">
+            <dt>Amount</dt><dd>{{ result()!.amountCents ? formatCents(result()!.amountCents!) : '-' }}</dd>
+            <dt>Trace</dt><dd>{{ result()!.traceNo ?? '-' }}</dd>
+            <dt>Receipt</dt><dd>{{ result()!.receiptNo ?? '-' }}</dd>
+            <dt>Card</dt><dd>{{ result()!.cardTypeName ?? '-' }}</dd>
+            <dt>PAN</dt><dd>{{ result()!.maskedPan ?? '-' }}</dd>
+            <dt>Terminal ID</dt><dd>{{ result()!.terminalId ?? '-' }}</dd>
+            <dt>AID</dt><dd>{{ result()!.aid ?? '-' }}</dd>
+          </dl>
+          <pre class="receipt">{{ result()!.merchantReceipt.join('\n') }}</pre>
+          <div class="actions">
+            <button type="button" [disabled]="!result()!.receiptNo || busy()" (click)="reverse()">Reverse this payment</button>
+            <button type="button" [disabled]="!result()!.rawStatusInformation" (click)="copyRawStatus()">Copy raw 04 0F hex</button>
+          </div>
+        </ng-container>
+        <ng-template #noResult>
+          <p class="empty-state">No transaction result yet.</p>
+        </ng-template>
+      </section>
+
+      <section *ngIf="activeTab() === 'log'" class="panel log-panel">
+        <div class="log-heading">
+          <h2>Raw hex trace</h2>
+          <button type="button" (click)="copyLog()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <div class="console">
+          <div class="console-bar"><span></span><span></span><span></span></div>
+          <pre class="log"><code *ngFor="let line of logs(); trackBy: trackLog">{{ line }}
+</code></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
